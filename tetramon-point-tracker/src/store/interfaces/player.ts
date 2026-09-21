@@ -1,7 +1,9 @@
 import type { Element } from './element';
 
+export type PlayerId = string;
+
 export default interface Player {
-    id: number;
+    id: PlayerId;
     name: string;
     points: number;
     windElement: Element;

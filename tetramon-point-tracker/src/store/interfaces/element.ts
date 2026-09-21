@@ -2,13 +2,12 @@ export const ElementEnum = {
     Wind: 'wind',
     Fire: 'fire',
     Water: 'water',
-    Earth: 'earth',
+    Earth: 'earth'
 } as const;
 
-export type ElementType = (typeof ElementEnum)[keyof typeof ElementEnum];
+export type ElementType = 'wind' | 'fire' | 'water' | 'earth';
 
 export interface Element {
-    type: ElementType;
     basePoints: number;
     addedPoints: number;
 }

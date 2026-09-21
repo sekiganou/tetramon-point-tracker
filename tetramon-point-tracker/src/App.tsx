@@ -1,28 +1,34 @@
 import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
 import './App.css'
 import useGameStore from './store/gameStore'
 import usePlayerStore from './store/playerStore'
-import { ElementEnum } from './store/interfaces/element'
+import type { PlayerId } from './store/interfaces/player'
+import { ElementEnum, type ElementType } from './store/interfaces/element'
+import type Player from './store/interfaces/player'
 
 function App() {
   const startNewGame = useGameStore((state) => state.startNewGame);
   const nextRound = useGameStore((state) => state.nextRound);
   const playerMap = usePlayerStore((state) => state.playerMap);
+  const playerIds = useGameStore((state) => state.playerIds);
   const updateElementBasePoints = usePlayerStore((state) => state.updateElementBasePoints);
   const updateElementAddedPoints = usePlayerStore((state) => state.updateElementAddedPoints);
+  const winnerId = useGameStore((state) => state.winnerId);
   const [gameStarted, setGameStarted] = useState(false);
   const [refresh, setRefresh] = useState(false); // State to trigger re-render
+  const elements = Object.values(ElementEnum) as ElementType[]; // Get the element types from the enum
+  const players = playerIds.map((id) => playerMap[id]).filter((player): player is Player => Boolean(player));
 
   const forceUpdate = () => setRefresh(!refresh); // Function to toggle the refresh state
 
-  const players = [playerMap[1], playerMap[2]];
-
-  const updateBasePoints = (playerId: number, type: typeof ElementEnum[keyof typeof ElementEnum], value: string) => {
+  const updateBasePoints = (playerId: PlayerId, type: ElementType, value: string) => {
     updateElementBasePoints(playerId, type, value === '' ? 0 : Number(value));
   };
+
+  console.log('Player Map:', playerMap);
+  console.log('Player IDs:', playerIds);
+  console.log('Players:', players);
+  console.log('Rounds:', useGameStore((state) => state.rounds));
 
   return (
     <>
@@ -37,7 +43,8 @@ function App() {
             <div key={player.id}>
               <h2>{player.name || `Player ${index + 1}`}</h2>
               <p>Points: {player.points}</p>
-              {[ElementEnum.Wind, ElementEnum.Fire, ElementEnum.Water, ElementEnum.Earth].map((type) => (
+              {winnerId === player.id && <p>Winner!</p>}
+              {elements.map((type) => (
                 <div key={type}>
                   <label>{type} Base Points:</label>
                   <input

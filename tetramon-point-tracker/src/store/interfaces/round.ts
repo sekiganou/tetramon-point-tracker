@@ -1,8 +1,9 @@
-import type Player from "./player";
+import type { PlayerId } from "./player";
 
 export default interface Round {
     index: number;
-    activePlayer: Player;
-    nextPlayer: Player;
+    currentPlayerId: PlayerId;
+    nextPlayerId: PlayerId;
     nextPlayerPointsBefore: number;
+    nextPlayerPointsAfter: number;
 }
