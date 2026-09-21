@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
 
 import type Player from './interfaces/player';
@@ -13,11 +14,15 @@ const ELEMENT_TYPES = ['wind', 'fire', 'water', 'earth'] as const;
 interface PlayerStore {
     playerMap: Record<PlayerId, Player>;
     addPlayer: (name?: string) => PlayerId;
+    resetPlayers: () => void;
+    resetAddedPoints: () => void;
+    updatePlayerPoints: (id: PlayerId, points: number) => void;
+    clearAddedPoints: (id: PlayerId) => void;
     updateElementBasePoints: (id: PlayerId, type: ElementType, basePoints: number) => void;
     updateElementAddedPoints: (id: PlayerId, type: ElementType, addedPoints: number) => void;
 }
 
-const usePlayerStore = create<PlayerStore>((set) => ({
+const usePlayerStore = create<PlayerStore>()(persist((set) => ({
     playerMap: {},
     addPlayer: (name?: string) => {
         const newPlayerId = uuidv4();
@@ -35,6 +40,41 @@ const usePlayerStore = create<PlayerStore>((set) => ({
         set((state) => ({ playerMap: { ...state.playerMap, [newPlayerId]: player } }));
         return newPlayerId;
     },
+
+    resetPlayers: () => set({ playerMap: {} }),
+
+    resetAddedPoints: () => set((state) => ({
+        playerMap: Object.fromEntries(Object.entries(state.playerMap).map(([id, player]) => [id, {
+            ...player,
+            windElement: { ...player.windElement, addedPoints: 0 },
+            fireElement: { ...player.fireElement, addedPoints: 0 },
+            waterElement: { ...player.waterElement, addedPoints: 0 },
+            earthElement: { ...player.earthElement, addedPoints: 0 },
+        }])),
+    })),
+
+    updatePlayerPoints: (id, points) => set((state) => {
+        const player = state.playerMap[id];
+        if (!player) return state;
+        return { playerMap: { ...state.playerMap, [id]: { ...player, points } } };
+    }),
+
+    clearAddedPoints: (id) => set((state) => {
+        const player = state.playerMap[id];
+        if (!player) return state;
+        return {
+            playerMap: {
+                ...state.playerMap,
+                [id]: {
+                    ...player,
+                    windElement: { ...player.windElement, addedPoints: 0 },
+                    fireElement: { ...player.fireElement, addedPoints: 0 },
+                    waterElement: { ...player.waterElement, addedPoints: 0 },
+                    earthElement: { ...player.earthElement, addedPoints: 0 },
+                },
+            },
+        };
+    }),
 
     updateElementBasePoints: (id, type, basePoints) => set((state) => {
         const player = state.playerMap[id];
@@ -63,6 +103,6 @@ const usePlayerStore = create<PlayerStore>((set) => ({
 
         return { playerMap: { ...state.playerMap, [id]: updatedPlayer } };
     })
-}));
+}), { name: 'tetramon-player-store' }));
 
 export default usePlayerStore;

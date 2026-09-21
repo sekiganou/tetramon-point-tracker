@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import usePlayerStore from './playerStore';
 import type Round from './interfaces/round';
 import type { PlayerId } from './interfaces/player';
@@ -9,10 +10,11 @@ interface GameStore {
     playerIds: PlayerId[];
     winnerId?: PlayerId;
     startNewGame: (playerNames: string[]) => void;
+    resetGame: () => void;
     nextRound: () => void;
 }
 
-const useGameStore = create<GameStore>(() => ({
+const useGameStore = create<GameStore>()(persist((set) => ({
     rounds: [],
     playerIds: [],
     currentPlayerIndex: 0,
@@ -24,11 +26,16 @@ const useGameStore = create<GameStore>(() => ({
         if (gameStore.playerIds.length > 0) {
             throw new Error('A game is already in progress. Please reset the game before starting a new one.');
         }
-        playerNames.forEach((name) => {
+        playerStore.resetPlayers();
+        const playerIds = playerNames.map((name) => {
             const playerId = playerStore.addPlayer(name);
-            gameStore.playerIds.push(playerId);
+            return playerId;
         });
-        gameStore.nextRound();
+        useGameStore.setState({ rounds: [], playerIds, currentPlayerIndex: 0, winnerId: undefined });
+    },
+    resetGame: () => {
+        usePlayerStore.getState().resetPlayers();
+        set({ rounds: [], playerIds: [], currentPlayerIndex: 0, winnerId: undefined });
     },
     nextRound: () => {
         const playerStore = usePlayerStore.getState();
@@ -37,8 +44,6 @@ const useGameStore = create<GameStore>(() => ({
         if (!gameStore.playerIds.length) {
             throw new Error('No players in the game.');
         }
-
-        useGameStore.setState((state) => ({ ...state, currentRound: state.rounds[state.rounds.length - 1] || null }));
 
         const currentPlayerIndex = gameStore.currentPlayerIndex;
         const currentPlayerId = gameStore.playerIds[currentPlayerIndex];
@@ -66,21 +71,23 @@ const useGameStore = create<GameStore>(() => ({
 
         const totalActivePlayerElementPoints = activePlayerElementBasePoints + activePlayerElementAddedPoints;
 
-        nextPlayer.points -= totalActivePlayerElementPoints;
+        const nextPlayerPointsAfter = nextPlayer.points - totalActivePlayerElementPoints;
+        playerStore.updatePlayerPoints(nextPlayerId, nextPlayerPointsAfter);
+        playerStore.clearAddedPoints(currentPlayerId);
 
         useGameStore.setState((state) => ({
             ...state,
             currentPlayerIndex: nextPlayerIndex,
-            winnerId: nextPlayer.points <= 0 ? currentPlayerId : undefined,
+            winnerId: nextPlayerPointsAfter <= 0 ? currentPlayerId : undefined,
             rounds: [...state.rounds, {
                 index: state.rounds.length,
                 currentPlayerId,
                 nextPlayerId,
                 nextPlayerPointsBefore: nextPlayerPointsBefore,
-                nextPlayerPointsAfter: nextPlayer.points
+                nextPlayerPointsAfter
             }]
         }));
     },
-}));
+}), { name: 'tetramon-game-store' }));
 
 export default useGameStore;
