@@ -1,11 +1,11 @@
 export const ElementEnum = {
-    Wind: 'wind',
     Fire: 'fire',
+    Earth: 'earth',
     Water: 'water',
-    Earth: 'earth'
+    Wind: 'wind',
 } as const;
 
-export const ELEMENT_TYPES = ['wind', 'fire', 'water', 'earth'] as const;
+export const ELEMENT_TYPES = ['fire', 'earth', 'water', 'wind'] as const;
 
 export type ElementTypes = typeof ELEMENT_TYPES[number];
 

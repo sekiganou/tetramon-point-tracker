@@ -17,13 +17,19 @@ interface PlayerStore {
     resetPlayers: () => void;
     resetAllAddedPoints: () => void;
     resetAllCardPoints: () => void;
-    resetOneAddedPoints: (id: PlayerId) => void;
-    resetOneCardPoints: (id: PlayerId) => void;
+    resetAllShieldPoints: () => void;
+
+    resetPlayerAddedPoints: (id: PlayerId) => void;
+    resetPlayerCardPoints: (id: PlayerId) => void;
+    resetPlayerShieldPoints: (id: PlayerId) => void;
 
     updatePlayerPoints: (id: PlayerId, points: number) => void;
+    updatePlayerShieldPoints: (id: PlayerId, shieldPoints: number) => void;
+    addPlayerShieldPoints: (id: PlayerId, shieldPoints: number) => void;
+
     updateElementBasePoints: (id: PlayerId, type: ElementTypes, basePoints: number) => void;
-    updateElementAddedPoints: (id: PlayerId, type: ElementTypes, addedPoints: number) => void;
-    updateElementCardPoints: (id: PlayerId, type: ElementTypes, cardPoints: number) => void;
+    addElementAddedPoints: (id: PlayerId, type: ElementTypes, addedPoints: number) => void;
+    addElementCardPoints: (id: PlayerId, type: ElementTypes, cardPoints: number) => void;
 }
 
 const usePlayerStore = create<PlayerStore>()(persist((set) => ({
@@ -73,7 +79,7 @@ const usePlayerStore = create<PlayerStore>()(persist((set) => ({
         return { playerMap: { ...state.playerMap, [id]: { ...player, points } } };
     }),
 
-    resetOneAddedPoints: (id) => set((state) => {
+    resetPlayerAddedPoints: (id) => set((state) => {
         const player = state.playerMap[id];
         if (!player) return state;
         return {
@@ -90,7 +96,7 @@ const usePlayerStore = create<PlayerStore>()(persist((set) => ({
         };
     }),
 
-    resetOneCardPoints: (id) => set((state) => {
+    resetPlayerCardPoints: (id) => set((state) => {
         const player = state.playerMap[id];
         if (!player) return state;
         return {
@@ -121,7 +127,7 @@ const usePlayerStore = create<PlayerStore>()(persist((set) => ({
         return { playerMap: { ...state.playerMap, [id]: updatedPlayer } };
     }),
 
-    updateElementAddedPoints: (id, type, addedPoints) => set((state) => {
+    addElementAddedPoints: (id, type, addedPoints) => set((state) => {
         const player = state.playerMap[id];
         if (!player) return state;
         const updatedPlayer = { ...player };
@@ -135,19 +141,47 @@ const usePlayerStore = create<PlayerStore>()(persist((set) => ({
         return { playerMap: { ...state.playerMap, [id]: updatedPlayer } };
     }),
 
-    updateElementCardPoints: (id, type, cardPoints) => set((state) => {
+    addElementCardPoints: (id, type, cardPoints) => set((state) => {
         const player = state.playerMap[id];
         if (!player) return state;
         const updatedPlayer = { ...player };
 
         for (const elementType of ELEMENT_TYPES) {
             if (elementType === type) {
-                (updatedPlayer[`${elementType}Element` as keyof Player] as Element).cardPoints = cardPoints;
+                (updatedPlayer[`${elementType}Element` as keyof Player] as Element).cardPoints += cardPoints;
             }
         }
 
         return { playerMap: { ...state.playerMap, [id]: updatedPlayer } };
     }),
+
+    addPlayerShieldPoints: (id, shieldPoints) => set((state) => {
+        const player = state.playerMap[id];
+        if (!player) return state;
+        const newShieldPoints = (player.shieldPoints ?? 0) - shieldPoints;
+        return { playerMap: { ...state.playerMap, [id]: { ...player, shieldPoints: newShieldPoints } } };
+    }),
+
+    resetPlayerShieldPoints: (id) => set((state) => {
+        const player = state.playerMap[id];
+        if (!player) return state;
+        return { playerMap: { ...state.playerMap, [id]: { ...player, shieldPoints: undefined } } };
+    }),
+
+    resetAllShieldPoints: () => set((state) => {
+        const updatedPlayerMap: Record<PlayerId, Player> = {};
+        for (const [id, player] of Object.entries(state.playerMap)) {
+            updatedPlayerMap[id] = { ...player, shieldPoints: undefined };
+        }
+        return { playerMap: updatedPlayerMap };
+    }),
+
+    updatePlayerShieldPoints: (id, shieldPoints) => set((state) => {
+        const player = state.playerMap[id];
+        if (!player) return state;
+        return { playerMap: { ...state.playerMap, [id]: { ...player, shieldPoints } } };
+    }),
+
 }), { name: 'tetramon-player-store' }));
 
 export default usePlayerStore;

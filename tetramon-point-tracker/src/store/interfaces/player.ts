@@ -6,6 +6,7 @@ export default interface Player {
     id: PlayerId;
     name: string;
     points: number;
+    shieldPoints?: number;
     windElement: Element;
     fireElement: Element;
     waterElement: Element;

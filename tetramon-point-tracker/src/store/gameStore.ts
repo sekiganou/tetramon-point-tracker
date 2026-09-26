@@ -78,10 +78,22 @@ const useGameStore = create<GameStore>()(persist((set) => ({
             activePlayerElementAddedPoints +
             activePlayerElementCardPoints;
 
-        const nextPlayerPointsAfter = nextPlayer.points - totalActivePlayerElementPoints;
+        let nextPlayerPointsAfter = 0;
+
+        const nextPlayerShieldPointsBefore = nextPlayer.shieldPoints ?? 0;
+        if (totalActivePlayerElementPoints > nextPlayerShieldPointsBefore) {
+            const remainingPointsToSubtract = totalActivePlayerElementPoints - nextPlayerShieldPointsBefore;
+            nextPlayerPointsAfter = nextPlayerPointsBefore - remainingPointsToSubtract;
+            playerStore.resetPlayerShieldPoints(nextPlayerId);
+        } else {
+            nextPlayerPointsAfter = nextPlayerPointsBefore;
+            const nextPlayerShieldPointsAfter = nextPlayerShieldPointsBefore - totalActivePlayerElementPoints;
+            playerStore.updatePlayerShieldPoints(nextPlayerId, nextPlayerShieldPointsAfter);
+        }
+
         playerStore.updatePlayerPoints(nextPlayerId, nextPlayerPointsAfter);
-        playerStore.resetOneAddedPoints(currentPlayerId);
-        playerStore.resetOneCardPoints(currentPlayerId);
+        playerStore.resetPlayerAddedPoints(currentPlayerId);
+        playerStore.resetPlayerCardPoints(currentPlayerId);
 
         useGameStore.setState((state) => ({
             ...state,

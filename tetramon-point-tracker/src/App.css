@@ -9,39 +9,58 @@
 
 .app-header, .player-heading, .section-heading, .action-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .app-header { margin-bottom: 28px; color: var(--cream); }
-.app-header h1, .turn-banner h2, .quicelement-inputk-add h2, .player-panel h2, .welcome h2 { margin: 0; color: inherit; line-height: 1.35; }
+.app-header h1, .turn-banner h2, .quick-add h2, .player-panel h2, .welcome h2 { margin: 0; color: inherit; line-height: 1.35; }
 .app-header h1 { font-size: clamp(1.05rem, 4vw, 1.5rem); }
 .eyebrow { margin: 0 0 8px; color: var(--yellow); font-size: .58rem; line-height: 1.5; letter-spacing: .04em; }
 .status-light { width: 14px; height: 14px; flex: 0 0 auto; background: var(--mint); box-shadow: 0 0 0 4px rgba(98, 214, 167, .14); }
 .welcome, .quick-add, .player-panel { color: var(--cream); border-color: var(--line); background: rgba(23, 35, 43, .94); }
 .welcome { max-width: 520px; margin: 14vh auto 0; padding: 28px 20px; text-align: center; }
 .welcome h2 { margin-bottom: 18px; font-size: 1rem; }
-.muted, .quick-hint, .element-input small { color: var(--muted); }
+.muted, .quick-hint { color: var(--muted); }
 .muted { margin: 0 0 28px; font-family: "Courier New", monospace; font-size: .95rem; }
 .start-button { width: 100%; }
 
+/* Turn banner: the round marker and the live damage total are the two things a player needs at a glance */
 .turn-banner { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; padding: 18px 16px; color: var(--ink); background: var(--yellow); box-shadow: 6px 6px 0 rgba(0, 0, 0, .2); }
 .turn-banner .eyebrow { color: #66501a; }
 .turn-banner h2 { font-size: .95rem; }
-.turn-counter, .selected-element { flex: 0 0 auto; padding: 7px 8px; color: var(--ink); font-size: .58rem; background: var(--cream); }
 .turn-banner.is-finished { background: var(--mint); }
+.turn-banner-stats { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex: 0 0 auto; }
+.turn-counter { padding: 7px 8px; color: var(--ink); font-size: .55rem; background: var(--cream); }
+.damage-counter { display: flex; align-items: baseline; gap: 5px; padding: 8px 10px; color: var(--cream); font-size: .52rem; letter-spacing: .02em; background: var(--ink); }
+.damage-counter strong { font-size: 1rem; color: var(--coral); }
 
 .quick-add { margin-bottom: 18px; padding: 16px; }
 .quick-add h2 { font-size: .9rem; }
-.element-selector { display: grid; grid-template-columns: repeat(4, 1fr); margin: 18px 0 14px; border: 2px solid var(--line); }
-.element-tab { min-width: 0; min-height: 42px; padding: 8px 4px; overflow-wrap: anywhere; color: var(--muted); font-size: .53rem; background: transparent; border: 0; border-right: 2px solid var(--line); cursor: pointer; }
+.selected-element { flex: 0 0 auto; padding: 7px 8px; color: var(--ink); font-size: .58rem; background: var(--cream); }
+.element-selector { display: grid; grid-template-columns: repeat(4, 1fr); margin: 18px 0 20px; border: 2px solid var(--line); }
+.element-tab { min-width: 0; min-height: 42px; padding: 8px 4px; overflow-wrap: anywhere; color: var(--cream); font-size: .53rem; background: transparent; border: 0; border-right: 2px solid var(--line); cursor: pointer; opacity: .55; transition: opacity .15s ease, background-color .15s ease; }
 .element-tab:last-child { border-right: 0; }
-.element-tab.is-selected { color: var(--ink); }
+.element-tab:hover { opacity: .8; }
+.element-tab.is-selected { color: var(--ink); opacity: 1; }
+.element-tab.element-wind { background: rgba(244, 201, 93, .16); }
+.element-tab.element-fire { background: rgba(239, 106, 87, .16); }
+.element-tab.element-water { background: rgba(97, 181, 232, .16); }
+.element-tab.element-earth { background: rgba(98, 214, 167, .16); }
 .element-tab.element-wind.is-selected { background: #f4c95d; }
 .element-tab.element-fire.is-selected { background: #ef6a57; }
 .element-tab.element-water.is-selected { background: #61b5e8; }
 .element-tab.element-earth.is-selected { background: #62d6a7; }
+
+/* Added vs. card points: same button shape, different accent, so the two pools never get mixed up */
+.quick-group { padding: 12px; border: 2px solid var(--line); }
+.quick-group + .quick-group { margin-top: 12px; }
+.quick-group-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.quick-group-label { margin: 0; font-size: .58rem; letter-spacing: .03em; color: var(--muted); }
+.quick-group-added .quick-group-label { color: var(--mint); }
+.quick-group-card .quick-group-label { color: var(--violet); }
 .quick-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .quick-buttons .nes-btn, .next-button, .restart-button { min-height: 48px; padding: 10px 8px; font-size: .65rem; }
-.quick-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.quick-hint { margin: 14px 0 0; font-family: "Courier New", monospace; font-size: .78rem; }
-.reset-added-button { flex: 0 0 auto; margin-top: 14px; padding: 5px 0; color: var(--muted); font-family: "Courier New", monospace; font-size: .72rem; background: none; border: 0; text-decoration: underline; cursor: pointer; }
-.reset-added-button:hover { color: var(--cream); }
+.nes-btn.is-card { color: var(--ink); background-color: var(--violet); box-shadow: inset -4px -4px #8d63cf; }
+.nes-btn.is-card:hover { background-color: #c1a5f5; }
+.reset-chip { flex: 0 0 auto; padding: 5px 8px; color: var(--muted); font-family: "Courier New", monospace; font-size: .66rem; background: none; border: 0; text-decoration: underline; cursor: pointer; }
+.reset-chip:hover { color: var(--cream); }
+.quick-hint { margin: 16px 0 0; font-family: "Courier New", monospace; font-size: .78rem; text-align: center; }
 
 .players-grid { display: grid; gap: 16px; }
 .player-panel { padding: 16px; border-width: 2px; transition: border-color .15s ease, transform .15s ease; }
@@ -49,18 +68,29 @@
 .player-heading { align-items: flex-start; margin-bottom: 18px; }
 .player-panel h2 { font-size: 1rem; }
 .player-score { color: var(--yellow); font-size: 1.2rem; line-height: 1; }
+.player-damage { display: inline-flex; align-items: baseline; gap: 5px; margin: 10px 0 0; padding: 6px 9px; color: var(--cream); font-size: .58rem; background: rgba(239, 106, 87, .18); border-left: 3px solid var(--coral); }
+.player-damage strong { font-size: 1.05rem; color: var(--coral); }
 .element-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-.element-input { display: grid; gap: 7px; min-width: 0; padding: 9px; padding-right: 16px; color: var(--cream); font-size: .58rem; border: 2px solid var(--line); }
+
+/* Each element card now shows three numbers with a clear job: base (editable), and the added/card pools that feed the turn total */
+.element-input { display: grid; gap: 8px; min-width: 0; padding: 7px; color: var(--cream); font-size: .58rem; border: 2px solid var(--line); }
 .element-input.element-wind { border-color: #b9972d; }
 .element-input.element-fire { border-color: #b44d40; }
 .element-input.element-water { border-color: #438ab7; }
 .element-input.element-earth { border-color: #3fa57e; }
-.element-input .nes-input { width: 100%; min-width: 0; height: 42px; padding: 8px; color: var(--ink); font-size: .85rem; background: var(--paper); border-width: 2px; }
+.element-input-head { display: flex; align-items: baseline; justify-content: space-between; }
+.element-total { color: var(--muted); font-size: .58rem; }
+.element-base-label { display: block; }
+.element-input .nes-input { width: 95%; min-width: 0; height: 42px; padding: 8px; color: var(--ink); font-size: .85rem; background: var(--paper); border-width: 2px; }
 .element-input.element-wind .nes-input { background: #fff1b8; }
 .element-input.element-fire .nes-input { background: #ffd0c8; }
 .element-input.element-water .nes-input { background: #c9eaff; }
 .element-input.element-earth .nes-input { background: #c8f3df; }
-.element-input small { font-family: "Courier New", monospace; font-size: .72rem; }
+.element-stats-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.stat-pill { padding: 4px 6px; font-family: "Courier New", monospace; font-size: .64rem; background: rgba(247, 242, 223, .06); }
+.stat-pill.stat-added { color: var(--mint); }
+.stat-pill.stat-card { color: var(--violet); }
+
 .action-row { align-items: stretch; margin-top: 18px; }
 .next-button { flex: 1; }
 .restart-button { color: var(--cream); background: transparent; border-color: var(--line); }
