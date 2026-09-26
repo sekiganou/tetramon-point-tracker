@@ -69,11 +69,19 @@ const useGameStore = create<GameStore>()(persist((set) => ({
             currentPlayer.waterElement.addedPoints +
             currentPlayer.earthElement.addedPoints;
 
-        const totalActivePlayerElementPoints = activePlayerElementBasePoints + activePlayerElementAddedPoints;
+        const activePlayerElementCardPoints = currentPlayer.windElement.cardPoints +
+            currentPlayer.fireElement.cardPoints +
+            currentPlayer.waterElement.cardPoints +
+            currentPlayer.earthElement.cardPoints;
+
+        const totalActivePlayerElementPoints = activePlayerElementBasePoints +
+            activePlayerElementAddedPoints +
+            activePlayerElementCardPoints;
 
         const nextPlayerPointsAfter = nextPlayer.points - totalActivePlayerElementPoints;
         playerStore.updatePlayerPoints(nextPlayerId, nextPlayerPointsAfter);
-        playerStore.clearAddedPoints(currentPlayerId);
+        playerStore.resetOneAddedPoints(currentPlayerId);
+        playerStore.resetOneCardPoints(currentPlayerId);
 
         useGameStore.setState((state) => ({
             ...state,

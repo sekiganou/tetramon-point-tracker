@@ -2,10 +2,10 @@ import { useState } from 'react'
 import './App.css'
 import useGameStore from './store/gameStore'
 import usePlayerStore from './store/playerStore'
-import { ElementEnum, type ElementType } from './store/interfaces/element'
+import { ElementEnum, type ElementTypes } from './store/interfaces/element'
 import type Player from './store/interfaces/player'
 
-const ELEMENT_LABELS: Record<ElementType, string> = {
+const ELEMENT_LABELS: Record<ElementTypes, string> = {
   wind: 'Wind',
   fire: 'Fire',
   water: 'Water',
@@ -21,18 +21,18 @@ function App() {
   const rounds = useGameStore((state) => state.rounds)
   const winnerId = useGameStore((state) => state.winnerId)
   const playerMap = usePlayerStore((state) => state.playerMap)
-  const resetAddedPoints = usePlayerStore((state) => state.resetAddedPoints)
+  const resetAddedPoints = usePlayerStore((state) => state.resetAllAddedPoints)
   const updateElementBasePoints = usePlayerStore((state) => state.updateElementBasePoints)
   const updateElementAddedPoints = usePlayerStore((state) => state.updateElementAddedPoints)
-  const [currentElement, setCurrentElement] = useState<ElementType>(ElementEnum.Wind)
+  const [currentElement, setCurrentElement] = useState<ElementTypes>(ElementEnum.Wind)
 
   const players = playerIds.map((id) => playerMap[id]).filter((player): player is Player => Boolean(player))
   const activePlayer = players[currentPlayerIndex]
   const gameStarted = players.length > 0
   const gameOver = Boolean(winnerId)
-  const elements = Object.values(ElementEnum) as ElementType[]
+  const elements = Object.values(ElementEnum) as ElementTypes[]
 
-  const updateBasePoints = (playerId: string, type: ElementType, value: string) => {
+  const updateBasePoints = (playerId: string, type: ElementTypes, value: string) => {
     const parsedValue = value === '' ? 0 : Number(value)
     if (Number.isFinite(parsedValue) && parsedValue >= 0) {
       updateElementBasePoints(playerId, type, Math.floor(parsedValue))

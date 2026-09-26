@@ -5,9 +5,12 @@ export const ElementEnum = {
     Earth: 'earth'
 } as const;
 
-export type ElementType = 'wind' | 'fire' | 'water' | 'earth';
+export const ELEMENT_TYPES = ['wind', 'fire', 'water', 'earth'] as const;
+
+export type ElementTypes = typeof ELEMENT_TYPES[number];
 
 export interface Element {
     basePoints: number;
     addedPoints: number;
+    cardPoints: number;
 }

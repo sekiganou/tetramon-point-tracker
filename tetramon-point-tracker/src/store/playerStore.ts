@@ -4,22 +4,26 @@ import { v4 as uuidv4 } from 'uuid';
 
 import type Player from './interfaces/player';
 import type { PlayerId } from './interfaces/player';
-import type { Element, ElementType } from './interfaces/element';
+import { ELEMENT_TYPES, type Element, type ElementTypes } from './interfaces/element';
 
 const DEFAULT_ELEMENT_POINTS = 0;
 const DEFAULT_PLAYER_POINTS = 500;
 
-const ELEMENT_TYPES = ['wind', 'fire', 'water', 'earth'] as const;
-
 interface PlayerStore {
     playerMap: Record<PlayerId, Player>;
+
     addPlayer: (name?: string) => PlayerId;
+
     resetPlayers: () => void;
-    resetAddedPoints: () => void;
+    resetAllAddedPoints: () => void;
+    resetAllCardPoints: () => void;
+    resetOneAddedPoints: (id: PlayerId) => void;
+    resetOneCardPoints: (id: PlayerId) => void;
+
     updatePlayerPoints: (id: PlayerId, points: number) => void;
-    clearAddedPoints: (id: PlayerId) => void;
-    updateElementBasePoints: (id: PlayerId, type: ElementType, basePoints: number) => void;
-    updateElementAddedPoints: (id: PlayerId, type: ElementType, addedPoints: number) => void;
+    updateElementBasePoints: (id: PlayerId, type: ElementTypes, basePoints: number) => void;
+    updateElementAddedPoints: (id: PlayerId, type: ElementTypes, addedPoints: number) => void;
+    updateElementCardPoints: (id: PlayerId, type: ElementTypes, cardPoints: number) => void;
 }
 
 const usePlayerStore = create<PlayerStore>()(persist((set) => ({
@@ -31,10 +35,10 @@ const usePlayerStore = create<PlayerStore>()(persist((set) => ({
             id: newPlayerId,
             name: name ?? `${newPlayerId}`,
             points: DEFAULT_PLAYER_POINTS,
-            windElement: { basePoints: DEFAULT_ELEMENT_POINTS, addedPoints: DEFAULT_ELEMENT_POINTS },
-            fireElement: { basePoints: DEFAULT_ELEMENT_POINTS, addedPoints: DEFAULT_ELEMENT_POINTS },
-            waterElement: { basePoints: DEFAULT_ELEMENT_POINTS, addedPoints: DEFAULT_ELEMENT_POINTS },
-            earthElement: { basePoints: DEFAULT_ELEMENT_POINTS, addedPoints: DEFAULT_ELEMENT_POINTS },
+            windElement: { basePoints: DEFAULT_ELEMENT_POINTS, addedPoints: DEFAULT_ELEMENT_POINTS, cardPoints: DEFAULT_ELEMENT_POINTS },
+            fireElement: { basePoints: DEFAULT_ELEMENT_POINTS, addedPoints: DEFAULT_ELEMENT_POINTS, cardPoints: DEFAULT_ELEMENT_POINTS },
+            waterElement: { basePoints: DEFAULT_ELEMENT_POINTS, addedPoints: DEFAULT_ELEMENT_POINTS, cardPoints: DEFAULT_ELEMENT_POINTS },
+            earthElement: { basePoints: DEFAULT_ELEMENT_POINTS, addedPoints: DEFAULT_ELEMENT_POINTS, cardPoints: DEFAULT_ELEMENT_POINTS },
         };
 
         set((state) => ({ playerMap: { ...state.playerMap, [newPlayerId]: player } }));
@@ -43,13 +47,23 @@ const usePlayerStore = create<PlayerStore>()(persist((set) => ({
 
     resetPlayers: () => set({ playerMap: {} }),
 
-    resetAddedPoints: () => set((state) => ({
+    resetAllAddedPoints: () => set((state) => ({
         playerMap: Object.fromEntries(Object.entries(state.playerMap).map(([id, player]) => [id, {
             ...player,
-            windElement: { ...player.windElement, addedPoints: 0 },
-            fireElement: { ...player.fireElement, addedPoints: 0 },
-            waterElement: { ...player.waterElement, addedPoints: 0 },
-            earthElement: { ...player.earthElement, addedPoints: 0 },
+            windElement: { ...player.windElement, addedPoints: DEFAULT_ELEMENT_POINTS },
+            fireElement: { ...player.fireElement, addedPoints: DEFAULT_ELEMENT_POINTS },
+            waterElement: { ...player.waterElement, addedPoints: DEFAULT_ELEMENT_POINTS },
+            earthElement: { ...player.earthElement, addedPoints: DEFAULT_ELEMENT_POINTS },
+        }])),
+    })),
+
+    resetAllCardPoints: () => set((state) => ({
+        playerMap: Object.fromEntries(Object.entries(state.playerMap).map(([id, player]) => [id, {
+            ...player,
+            windElement: { ...player.windElement, cardPoints: DEFAULT_ELEMENT_POINTS },
+            fireElement: { ...player.fireElement, cardPoints: DEFAULT_ELEMENT_POINTS },
+            waterElement: { ...player.waterElement, cardPoints: DEFAULT_ELEMENT_POINTS },
+            earthElement: { ...player.earthElement, cardPoints: DEFAULT_ELEMENT_POINTS },
         }])),
     })),
 
@@ -59,7 +73,7 @@ const usePlayerStore = create<PlayerStore>()(persist((set) => ({
         return { playerMap: { ...state.playerMap, [id]: { ...player, points } } };
     }),
 
-    clearAddedPoints: (id) => set((state) => {
+    resetOneAddedPoints: (id) => set((state) => {
         const player = state.playerMap[id];
         if (!player) return state;
         return {
@@ -67,10 +81,27 @@ const usePlayerStore = create<PlayerStore>()(persist((set) => ({
                 ...state.playerMap,
                 [id]: {
                     ...player,
-                    windElement: { ...player.windElement, addedPoints: 0 },
-                    fireElement: { ...player.fireElement, addedPoints: 0 },
-                    waterElement: { ...player.waterElement, addedPoints: 0 },
-                    earthElement: { ...player.earthElement, addedPoints: 0 },
+                    windElement: { ...player.windElement, addedPoints: DEFAULT_ELEMENT_POINTS },
+                    fireElement: { ...player.fireElement, addedPoints: DEFAULT_ELEMENT_POINTS },
+                    waterElement: { ...player.waterElement, addedPoints: DEFAULT_ELEMENT_POINTS },
+                    earthElement: { ...player.earthElement, addedPoints: DEFAULT_ELEMENT_POINTS },
+                },
+            },
+        };
+    }),
+
+    resetOneCardPoints: (id) => set((state) => {
+        const player = state.playerMap[id];
+        if (!player) return state;
+        return {
+            playerMap: {
+                ...state.playerMap,
+                [id]: {
+                    ...player,
+                    windElement: { ...player.windElement, cardPoints: DEFAULT_ELEMENT_POINTS },
+                    fireElement: { ...player.fireElement, cardPoints: DEFAULT_ELEMENT_POINTS },
+                    waterElement: { ...player.waterElement, cardPoints: DEFAULT_ELEMENT_POINTS },
+                    earthElement: { ...player.earthElement, cardPoints: DEFAULT_ELEMENT_POINTS },
                 },
             },
         };
@@ -102,7 +133,21 @@ const usePlayerStore = create<PlayerStore>()(persist((set) => ({
         }
 
         return { playerMap: { ...state.playerMap, [id]: updatedPlayer } };
-    })
+    }),
+
+    updateElementCardPoints: (id, type, cardPoints) => set((state) => {
+        const player = state.playerMap[id];
+        if (!player) return state;
+        const updatedPlayer = { ...player };
+
+        for (const elementType of ELEMENT_TYPES) {
+            if (elementType === type) {
+                (updatedPlayer[`${elementType}Element` as keyof Player] as Element).cardPoints = cardPoints;
+            }
+        }
+
+        return { playerMap: { ...state.playerMap, [id]: updatedPlayer } };
+    }),
 }), { name: 'tetramon-player-store' }));
 
 export default usePlayerStore;
