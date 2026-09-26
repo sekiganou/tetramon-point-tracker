@@ -24,7 +24,6 @@ function App() {
   const nextRound = useGameStore((state) => state.nextRound);
   const playerIds = useGameStore((state) => state.playerIds);
   const currentPlayerIndex = useGameStore((state) => state.currentPlayerIndex);
-  const rounds = useGameStore((state) => state.rounds);
   const winnerId = useGameStore((state) => state.winnerId);
   const playerMap = usePlayerStore((state) => state.playerMap);
   const updateElementBasePoints = usePlayerStore(
